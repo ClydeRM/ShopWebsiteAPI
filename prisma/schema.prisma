@@ -22,6 +22,8 @@ model User {
   firstname String?
   lastname  String?
   role      Role
+
+  @@map("users")
 }
 
 enum Role {
