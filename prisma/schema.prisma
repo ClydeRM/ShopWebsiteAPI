@@ -6,8 +6,7 @@ generator client {
 }
 
 datasource db {
-  // provider = "postgresql"
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -15,7 +14,7 @@ model Category {
   id  Int @id @default(autoincrement())
   name String @db.VarChar(200)
   desc String?  @db.VarChar(500)
-  enable Boolean @db.Bit(1) @default(true)
+  enable Boolean @default(true)
   mercs CategoryDtl[]
   createAt DateTime  @default(now())
   updateAt  DateTime @updatedAt
@@ -26,7 +25,7 @@ model Merchandise {
   id  Int @id @default(autoincrement())
   name String @db.VarChar(200)
   desc String @db.VarChar(500)
-  enable Boolean  @db.Bit(1) @default(true)
+  enable Boolean @default(true)
   cats CategoryDtl[]
   cartItems CartItems[]
   createAt DateTime  @default(now())
@@ -84,7 +83,7 @@ model Address {
   district String? @db.VarChar(128)
   postalCode String? @db.VarChar(10)
   address String @db.VarChar(256)
-  type Boolean  @db.Bit(1) // true for delivery address, false for bill address
+  type Boolean // true for delivery address, false for bill address
   order Order[]
   createAt DateTime  @default(now())
   updateAt  DateTime @updatedAt
