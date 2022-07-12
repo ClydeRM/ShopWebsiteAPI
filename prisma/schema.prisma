@@ -6,115 +6,25 @@ generator client {
 }
 
 datasource db {
-  // provider = "postgresql"
-  provider = "mysql"
+  provider = "postgresql"
+  // provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-model Category {
-  id  Int @id @default(autoincrement())
-  name String @db.VarChar(200)
-  desc String?  @db.VarChar(500)
-  enable Boolean @db.Bit(1) @default(true)
-  mercs CategoryDtl[]
-  createAt DateTime  @default(now())
-  updateAt  DateTime @updatedAt
-  deleteAt DateTime?
-}
-
-model Merchandise {
-  id  Int @id @default(autoincrement())
-  name String @db.VarChar(200)
-  desc String @db.VarChar(500)
-  enable Boolean  @db.Bit(1) @default(true)
-  cats CategoryDtl[]
-  cartItems CartItems[]
-  createAt DateTime  @default(now())
-  updateAt  DateTime @updatedAt
-  deleteAt DateTime?
-}
-
-model CategoryDtl {
-  cat  Category @relation(fields:[catId], references: [id])
-  catId Int
-  merc Merchandise @relation(fields: [mercId], references: [id])
-  mercId Int
-  assignedAt DateTime @default(now())
-  assignedBy String
-  createAt DateTime  @default(now())
-  updateAt  DateTime @updatedAt
-  deleteAt DateTime?
-  @@id([catId, mercId])
-}
-
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String @db.VarChar(256)   @unique
-  name      String @db.VarChar(32) 
-  phone     String @db.VarChar(20)
-  gender    String @db.VarChar(2)
-  role      Role     @default(USER)
+  id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now())
-  addresses Address[]
-  orders Order[]
-  cartItems CartItems[]
-  createAt DateTime  @default(now())
-  updateAt  DateTime @updatedAt
-  deleteAt DateTime?
+  updatedAt DateTime @updatedAt
+  email     String   @unique
+  hash      String
+  // Hashed Refresh Token
+  hashedRT  String?
+  firstname String?
+  lastname  String?
+  role      Role
 }
-
-model CartItems {
-  uid Int
-  user User @relation(fields: [uid], references: [id])
-  mercId Int
-  merc Merchandise @relation(fields: [mercId], references: [id])
-  quantity Int
-  // Could be deleted freely
-  @@id([uid,mercId])
-}
-
-model Address {
-  id Int @id @default(autoincrement())
-  uid Int
-  user User @relation(fields: [uid], references: [id])
-  country String @db.VarChar(128)
-  state String? @db.VarChar(128)
-  county String? @db.VarChar(128)
-  city String? @db.VarChar(128)
-  district String? @db.VarChar(128)
-  postalCode String? @db.VarChar(10)
-  address String @db.VarChar(256)
-  type Boolean  @db.Bit(1) // true for delivery address, false for bill address
-  order Order[]
-  createAt DateTime  @default(now())
-  updateAt  DateTime @updatedAt
-  // Could be deleted freely
-}
-
-model Order {
-  id Int @id @default(autoincrement())
-  oid String @db.VarChar(50)
-  uid Int
-  user User @relation(fields: [uid], references: [id])
-  addrId Int
-  address Address @relation(fields: [addrId], references: [id])
-  mercId Int
-  quantity Int
-  createAt DateTime  @default(now())
-  updateAt  DateTime @updatedAt
-  // Shouldn't be deleted
-}
-
-
-//model Stock {
-//  mercId Int
-//  stockAmount Int
-//  delivAmount Int
-//  saledAmount Int
-//}
 
 enum Role {
   ADMIN
-  MANAGER
-  USER 
+  USER
 }
