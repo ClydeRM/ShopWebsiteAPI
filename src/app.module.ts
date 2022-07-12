@@ -7,6 +7,10 @@ import { AppService } from './app.service';
   imports: [
     PrismaModule.forRoot({
       isGlobal: true,
+      prismaServiceOptions: {
+        prismaOptions: { log: ['info'] },
+        explicitConnect: true,
+      },
     }),
   ],
   controllers: [AppController],
