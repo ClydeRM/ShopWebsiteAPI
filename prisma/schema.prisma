@@ -26,6 +26,8 @@ model Merchandise {
   name String @db.VarChar(200)
   desc String @db.VarChar(500)
   enable Boolean @default(true)
+  cost Float
+  price Float
   cats CategoryDtl[]
   cartItems CartItems[]
   createAt DateTime  @default(now())
