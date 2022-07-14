@@ -1,13 +1,13 @@
 import { Body, Controller, Param, Post, Get, Patch } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { CategoryDto } from './dto';
+import { CategoryDto, UpdateCategoryDto } from './dto';
 
 @Controller('category')
 export class CategoryController {
   constructor(private categoryService: CategoryService) {}
 
   @Post('add')
-  async addCategory(@Body() categoryDto: CategoryDto) {
+  async add(@Body() categoryDto: CategoryDto) {
     try {
       await this.categoryService.add(categoryDto);
       return 'Insertion Successed';
@@ -17,60 +17,57 @@ export class CategoryController {
   }
 
   @Get('get/all')
-  async getAllCategory() {
+  async getAll() {
     try {
       return await this.categoryService.getAll();
     } catch (e) {
-      return `Insertion Failed: ${e}`;
+      return `Query Failed: ${e}`;
     }
   }
 
-  @Get('get')
-  async getCategory(@Body() categoryDto: CategoryDto) {
+  @Get('get/:id')
+  async get(@Param('id') id: number) {
     try {
-      return await this.categoryService.get(categoryDto);
+      return await this.categoryService.get(id);
     } catch (e) {
-      return `Insertion Failed: ${e}`;
+      return `Query Failed: ${e}`;
     }
   }
 
   @Patch('mod')
-  async modCategory(@Body() [whereDto, dataDto]: CategoryDto[]) {
+  async mod(@Body() categoryDto: UpdateCategoryDto) {
     try {
-      await this.categoryService.update(whereDto, dataDto);
+      await this.categoryService.update(categoryDto.id, categoryDto);
       return 'Update Successed';
     } catch (e) {
       return `Update Failed: ${e}`;
     }
   }
 
-  @Patch('state/:state')
-  async setCategory(
-    @Body() whereDto: CategoryDto,
-    @Param('state') state: boolean,
-  ) {
+  @Patch('state/:id:state')
+  async setStatus(@Param('id') id: number, @Param('state') state: boolean) {
     try {
-      await this.categoryService.setStatus(whereDto, state);
+      await this.categoryService.setStatus(id, state);
       return 'Update Successed';
     } catch (e) {
       return `Update Failed: ${e}`;
     }
   }
 
-  @Patch('enable')
-  async enable(@Body() whereDto: CategoryDto) {
+  @Patch('enable/:id')
+  async enable(@Param('id') id: number) {
     try {
-      await this.categoryService.enable(whereDto);
+      await this.categoryService.enable(id);
       return 'Update Successed';
     } catch (e) {
       return `Update Failed: ${e}`;
     }
   }
 
-  @Patch('disable')
-  async disable(@Body() whereDto: CategoryDto) {
+  @Patch('disable/:id')
+  async disable(@Param('id') id: number) {
     try {
-      await this.categoryService.disable(whereDto);
+      await this.categoryService.disable(id);
       return 'Update Successed';
     } catch (e) {
       return `Update Failed: ${e}`;
