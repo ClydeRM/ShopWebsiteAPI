@@ -1,3 +1,4 @@
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { PrismaClientExceptionFilter, PrismaService } from 'nestjs-prisma';
@@ -6,6 +7,9 @@ import type { NestConfig } from 'src/common/configs/config.interface';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Validation
+  app.useGlobalPipes(new ValidationPipe());
 
   // enable shutdown hook
   const prismaService: PrismaService = app.get(PrismaService);
