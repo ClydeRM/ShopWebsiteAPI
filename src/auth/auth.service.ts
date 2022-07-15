@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'nestjs-prisma';
-import { PasswordService } from './password.service';
+import { HashService } from './password.service';
 
 import { SecurityConfig } from 'src/common/configs/config.interface';
 import { SigninDto, SignupDto } from './dto';
@@ -20,14 +20,12 @@ export class AuthService {
     private configService: ConfigService,
     private prisma: PrismaService,
     private jwtService: JwtService,
-    private passwordService: PasswordService,
+    private hashService: HashService,
   ) {}
 
   async localSignup(signupDto: SignupDto): Promise<Tokens> {
     // Hash User Password
-    const hashedPassword = await this.passwordService.hashData(
-      signupDto.password,
-    );
+    const hashedPassword = await this.hashService.hashData(signupDto.password);
 
     try {
       // Create User
@@ -64,15 +62,17 @@ export class AuthService {
     }
   }
   async localSignin(signinDto: SigninDto): Promise<Tokens> {
+    // Find user by email
     const user = await this.prisma.user.findUnique({
       where: { email: signinDto.email },
     });
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     // Validate password
-    const passwordValide = await this.passwordService.validatePassword(
+    const passwordValide = await this.hashService.validateData(
       signinDto.password,
       user.hash,
     );
@@ -92,11 +92,53 @@ export class AuthService {
 
     return tokens;
   }
-  async logout() {}
-  async refresh() {}
+  async logout(userId: string) {
+    // If hashedRT field is null, represent User already logout
+    // Get user by id, and only if hashedRt field is not NULL
+    await this.prisma.user.updateMany({
+      where: {
+        id: userId,
+        hashedRT: {
+          not: null,
+        },
+      },
+      data: {
+        hashedRT: null,
+      },
+    });
+  }
+  async refreshToken(userId: string, rt: string): Promise<Tokens> {
+    // Find user by id
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new ForbiddenException('Access Denied.');
+    }
+
+    // validate refresh_token
+    const rtMatch = this.hashService.validateData(rt, user.hashedRT);
+
+    if (!rtMatch) {
+      throw new ForbiddenException('Access Denied.');
+    }
+
+    // Generate Tokens
+    const tokens = await this.generateTokens({
+      userId: user.id,
+      email: user.email,
+    });
+    await this.updateHashedRt(user.id, tokens.refresh_token);
+
+    return tokens;
+  }
 
   async updateHashedRt(userId: string, rt: string): Promise<void> {
-    const hashedRefreshToken = await this.passwordService.hashData(rt);
+    // Save refresh_token
+    const hashedRefreshToken = await this.hashService.hashData(rt);
     await this.prisma.user.update({
       where: {
         id: userId,
