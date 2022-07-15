@@ -1,3 +1,3 @@
 export * from './tokens.type';
 export * from './jwtPayload.type';
-export * from './jwtPayloadWithRT';
+export * from './jwtPayloadWithRT.type';
