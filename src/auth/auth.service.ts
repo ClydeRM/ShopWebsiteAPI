@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'nestjs-prisma';
-import { HashService } from './password.service';
+import { HashService } from './hash.service';
 
 import { SecurityConfig } from 'src/common/configs/config.interface';
 import { SigninDto, SignupDto } from './dto';
