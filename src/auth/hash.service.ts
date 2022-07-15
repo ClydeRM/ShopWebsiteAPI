@@ -4,7 +4,7 @@ import { hash, compare } from 'bcrypt';
 import { SecurityConfig } from 'src/common/configs/config.interface';
 
 @Injectable()
-export class PasswordService {
+export class HashService {
   get bcryptSaltRounds(): string | number {
     const securityConfig = this.configService.get<SecurityConfig>('security');
     const saltOrRound = securityConfig.bcryptSaltOrRound;
@@ -16,11 +16,11 @@ export class PasswordService {
 
   constructor(private configService: ConfigService) {}
 
-  validatePassword(password: string, hash: string): Promise<boolean> {
-    return compare(password, hash);
+  validateData(data: string, hash: string): Promise<boolean> {
+    return compare(data, hash);
   }
 
-  hashData(password: string): Promise<string> {
-    return hash(password, this.bcryptSaltRounds);
+  hashData(data: string): Promise<string> {
+    return hash(data, this.bcryptSaltRounds);
   }
 }
