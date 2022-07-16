@@ -19,36 +19,42 @@ export class MerchandiseService {
     });
   }
 
-  async get(id: number) {
+  async get(id: string) {
+    const _id: number = +id;
+    console.log(_id);
     return await this.prisma.category.findMany({
       where: {
-        id: id,
+        id: _id,
       },
     });
   }
 
-  async update(id: number, merchandiseDto: UpdateMerchandiseDto) {
+  async update(id: string, merchandiseDto: UpdateMerchandiseDto) {
+    const _id: number = parseInt(id);
+    console.log(id);
+    console.log(merchandiseDto.desc);
     await this.prisma.category.update({
-      where: { id },
+      where: { id: _id },
       data: merchandiseDto,
     });
   }
 
-  async setStatus(id: number, status: boolean) {
+  async setStatus(id: string, status: boolean) {
+    const _id: number = +id;
     await this.prisma.category.update({
-      where: { id },
+      where: { id: _id },
       data: {
         enable: status,
       },
     });
   }
-  async enable(id: number) {
+  async enable(id: string) {
     await this.setStatus(id, true);
   }
-  async disable(id: number) {
+  async disable(id: string) {
     await this.setStatus(id, false);
   }
-  async delete(id: number) {
+  async delete(id: string) {
     const merchandiseDto = new UpdateMerchandiseDto();
     merchandiseDto.deleteAt = new Date(Date.now());
     await this.update(id, merchandiseDto);

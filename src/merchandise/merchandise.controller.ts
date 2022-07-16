@@ -26,7 +26,7 @@ export class MerchandiseController {
   }
 
   @Get('get/:id')
-  async get(@Param('id') id: number) {
+  async get(@Param('id') id: string) {
     try {
       return await this.merchandiseService.get(id);
     } catch (e) {
@@ -34,17 +34,21 @@ export class MerchandiseController {
     }
   }
 
-  @Patch('mod')
-  async mod(@Body() merchandiseDto: UpdateMerchandiseDto) {
+  @Patch('mod/:id')
+  async mod(
+    @Param('id') id: string,
+    @Body() merchandiseDto: UpdateMerchandiseDto,
+  ) {
     try {
-      await this.merchandiseService.update(merchandiseDto.id, merchandiseDto);
+      await this.merchandiseService.update(id, merchandiseDto);
+      return 'Update Successed';
     } catch (e) {
       return `Update Failed: ${e}`;
     }
   }
 
-  @Patch('state/:id:state')
-  async setStatus(@Param('id') id: number, @Param('state') state: boolean) {
+  @Patch('state/:id=:state')
+  async setStatus(@Param('id') id: string, @Param('state') state: boolean) {
     try {
       await this.merchandiseService.setStatus(id, state);
       return 'Update Successed';
@@ -54,7 +58,7 @@ export class MerchandiseController {
   }
 
   @Patch('enable/:id')
-  async enable(@Param('id') id: number) {
+  async enable(@Param('id') id: string) {
     try {
       await this.merchandiseService.enable(id);
       return 'Update Successed';
@@ -64,7 +68,7 @@ export class MerchandiseController {
   }
 
   @Patch('disable/:id')
-  async disable(@Param('id') id: number) {
+  async disable(@Param('id') id: string) {
     try {
       await this.merchandiseService.enable(id);
       return 'Update Successed';
