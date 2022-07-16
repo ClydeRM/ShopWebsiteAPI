@@ -115,7 +115,7 @@ export class AuthService {
       },
     });
 
-    if (!user) {
+    if (!user || !user.hashedRT) {
       throw new ForbiddenException('Access Denied.');
     }
 
