@@ -52,10 +52,9 @@ model User {
   id        Int      @id @default(autoincrement())
   email     String @db.VarChar(256)   @unique
   name      String @db.VarChar(32) 
-  phone     String @db.VarChar(20)
+  phone     String @db.VarChar(20) @unique
   gender    String @db.VarChar(2)
   role      Role     @default(USER)
-  createdAt DateTime @default(now())
   addresses Address[]
   orders Order[]
   cartItems CartItems[]
