@@ -1,4 +1,12 @@
-import { Body, Controller, Param, Post, Get, Patch } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Post,
+  Get,
+  Patch,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CategoryDto, UpdateCategoryDto } from './dto';
 
@@ -26,7 +34,7 @@ export class CategoryController {
   }
 
   @Get('get/:id')
-  async get(@Param('id') id: number) {
+  async get(@Param('id', ParseIntPipe) id: number) {
     try {
       return await this.categoryService.get(id);
     } catch (e) {
@@ -34,18 +42,24 @@ export class CategoryController {
     }
   }
 
-  @Patch('mod')
-  async mod(@Body() categoryDto: UpdateCategoryDto) {
+  @Patch('mod/:id')
+  async mod(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() categoryDto: UpdateCategoryDto,
+  ) {
     try {
-      await this.categoryService.update(categoryDto.id, categoryDto);
+      await this.categoryService.update(id, categoryDto);
       return 'Update Successed';
     } catch (e) {
       return `Update Failed: ${e}`;
     }
   }
 
-  @Patch('state/:id:state')
-  async setStatus(@Param('id') id: number, @Param('state') state: boolean) {
+  @Patch('state/:id=:state')
+  async setStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('state') state: boolean,
+  ) {
     try {
       await this.categoryService.setStatus(id, state);
       return 'Update Successed';
@@ -55,7 +69,7 @@ export class CategoryController {
   }
 
   @Patch('enable/:id')
-  async enable(@Param('id') id: number) {
+  async enable(@Param('id', ParseIntPipe) id: number) {
     try {
       await this.categoryService.enable(id);
       return 'Update Successed';
@@ -65,9 +79,19 @@ export class CategoryController {
   }
 
   @Patch('disable/:id')
-  async disable(@Param('id') id: number) {
+  async disable(@Param('id', ParseIntPipe) id: number) {
     try {
       await this.categoryService.disable(id);
+      return 'Update Successed';
+    } catch (e) {
+      return `Update Failed: ${e}`;
+    }
+  }
+
+  @Patch('del/:id')
+  async del(@Param('id', ParseIntPipe) id: number) {
+    try {
+      await this.categoryService.delete(id);
       return 'Update Successed';
     } catch (e) {
       return `Update Failed: ${e}`;
