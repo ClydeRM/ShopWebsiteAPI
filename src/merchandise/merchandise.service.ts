@@ -20,7 +20,7 @@ export class MerchandiseService {
   }
 
   async get(id: number) {
-    return await this.prisma.merchandise.findMany({
+    return await this.prisma.merchandise.findUnique({
       where: { id },
     });
   }
