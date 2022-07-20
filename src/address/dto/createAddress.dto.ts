@@ -1,16 +1,6 @@
-import { User } from '@prisma/client';
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsNumber,
-  IsPostalCode,
-  IsString,
-} from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsPostalCode, IsString } from 'class-validator';
 
 export class CreateAddressDto {
-  @IsNumber()
-  @IsNotEmpty()
-  user: User;
   @IsString()
   @IsNotEmpty()
   country: string;
