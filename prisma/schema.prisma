@@ -88,7 +88,8 @@ model Address {
   order Order[]
   createAt DateTime  @default(now())
   updateAt  DateTime @updatedAt
-  // Could be deleted freely
+  deleteAt DateTime?
+  // Could not be deleted freely, because orders will use it
 }
 
 model Order {
