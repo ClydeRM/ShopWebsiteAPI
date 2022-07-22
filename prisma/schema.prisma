@@ -10,22 +10,179 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User
 model User {
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  email     String    @unique
+  hash      String // Hashed pwd
+  hashedRT  String? // Hashed Refresh Token
+  firstname String?   @db.VarChar(30)
+  lastname  String?   @db.VarChar(30)
+  phone     String?   @unique @db.VarChar(10)
+  role      Role      @default(USER)
+
+  payments  Payment[] // One to many
+  addresses Address[] // One to many
+  orders    Order[] // One to many
+  cartItems CartItems[] // One to many
+
+  @@index([id, email])
+  @@map("users")
+}
+
+// Payment
+model Payment {
+  id          String      @id @default(uuid()) @db.Uuid
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  // Could be deleted freely
+  userId      String      @db.Uuid // many to one
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentType PaymentType @default(CREDIT)
+  bankCode    String?     @db.VarChar(3)
+  account     String?     @db.VarChar(16)
+  expiry      DateTime?
+
+  @@index([id])
+  @@map("payments")
+}
+
+// Address
+model Address {
+  id         String      @id @default(uuid()) @db.Uuid
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  // Could be delete freely
+  userId     String      @db.Uuid // many to one
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  country    String      @db.VarChar(128)
+  state      String      @db.VarChar(128)
+  city       String      @db.VarChar(128)
+  district   String      @db.VarChar(128)
+  postalCode String      @db.VarChar(128)
+  address    String      @db.VarChar(128)
+  type       AddressType @default(DELIVERY)
+
+  @@map("addresses")
+}
+
+// An order represents the total price of the cartsItem(single deal)
+model Order {
   id        String   @id @default(uuid()) @db.Uuid
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  email     String   @unique
-  hash      String
-  // Hashed Refresh Token
-  hashedRT  String?
-  firstname String?
-  lastname  String?
-  role      Role
+  // Shouldn't be deleted
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  total     Float    @db.Real
 
-  @@map("users")
+  orderItem OrderItems[] // one to many
+
+  @@index([id, userId])
+  @@map("orders")
+}
+
+model OrderItems {
+  id        String      @id @default(uuid()) @db.Uuid
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  orderId   String      @db.Uuid // many to one
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  mercId    String      @db.Uuid // one to one
+  merc      Merchandise @relation(fields: [mercId], references: [id], onDelete: Cascade)
+  quantity  Int
+  subTotal  Float       @db.Real
+
+  @@index([id, orderId])
+  @@map("order_items")
+}
+
+// User's shopping_sessions has a lot of cartItems with a lot merchandise (one cartItem represent one merchandise)
+model CartItems {
+  id        String      @id @default(uuid()) @db.Uuid
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  // Could delete freely
+  userId    String      @db.Uuid // many to one
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mercId    String      @unique @db.Uuid // one to one
+  merc      Merchandise @relation(fields: [mercId], references: [id], onDelete: Cascade)
+  quantity  Int // Of merchandise
+  subTotal  Float       @db.Real // of the cartItems
+
+  @@index([id, userId, mercId])
+  @@map("cart_items")
+}
+
+model Merchandise {
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  catId     String    @db.Uuid // many to one
+  category  Category  @relation(fields: [catId], references: [id], onDelete: Cascade)
+  invId     String    @unique @db.Uuid // one to one
+  inventory Inventory @relation(fields: [invId], references: [id], onDelete: Cascade)
+  name      String    @db.VarChar(200) // Name of the Merchandise
+  desc      String    @db.VarChar(500) // Description of the Merchandise
+  image     String?
+  cost      Float     @db.Real
+  price     Float     @db.Real
+  enable    Boolean   @default(true) @db.Boolean
+
+  cartItems  CartItems? // one to one
+  orderItems OrderItems[] // One to many
+
+  @@index([id, catId, invId])
+  @@map("merchandise")
+}
+
+// Contain a lot of merchandise
+model Category {
+  id          String        @id @default(uuid()) @db.Uuid
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+  name        String        @unique @db.VarChar(200)
+  desc        String?       @db.VarChar(500)
+  enable      Boolean       @default(true)
+  Merchandise Merchandise[] // One to many
+
+  @@index([id])
+  @@map("categories")
+}
+
+model Inventory {
+  id          String       @id @default(uuid()) @db.Uuid
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+  quantity    Int          @db.Integer
+  sold        Int          @db.Integer
+  Merchandise Merchandise?
+
+  @@index([id])
+  @@map("inventories")
 }
 
 enum Role {
   ADMIN
+  MANAGER
   USER
+}
+
+enum PaymentType {
+  CREDIT //信用卡
+  PREPAID //金融卡
+  TRANSFERS //轉帳
+  CASH // 現金
+  MOBILE // 行動支付
+}
+
+enum AddressType {
+  DELIVERY
+  BILL
 }
