@@ -14,6 +14,6 @@ describe('AuthController', () => {
   // });
 
   it('should be defined', () => {
-    console.log("TODO: Auth Unit test");
+    console.log('TODO: Auth Unit test');
   });
 });
